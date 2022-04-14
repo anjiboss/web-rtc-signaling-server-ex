@@ -9,6 +9,7 @@ const io = new Server(httpServer, {
   cors: {
     origin: [
       "http://localhost:3000",
+      "http://192.168.43.172:3000",
       "https://animated-shortbread-6f92ef.netlify.app",
     ],
   },
@@ -20,11 +21,7 @@ const config = {
 
 let users: { username: string; socketId: string }[] = [];
 
-app.use(
-  cors({
-    origin: ["*"],
-  })
-);
+app.use(cors());
 
 let caller = "";
 
@@ -68,6 +65,10 @@ io.on("connection", (socket) => {
   socket.on("clear", () => {
     users = [];
   });
+});
+
+app.get("*", (_, res) => {
+  res.json({ ok: true });
 });
 
 httpServer.listen(config.port, () => {
