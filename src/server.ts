@@ -15,10 +15,7 @@ const io = new Server(httpServer, {
   },
 });
 
-const config = {
-  port: 5000,
-};
-
+const port = process.env.PORT;
 let users: { username: string; socketId: string }[] = [];
 
 app.use(cors());
@@ -71,6 +68,6 @@ app.get("*", (_, res) => {
   res.json({ ok: true });
 });
 
-httpServer.listen(config.port, () => {
-  console.log("app listening on port: " + config.port);
+httpServer.listen(port, () => {
+  console.log("app listening on port: " + port);
 });
