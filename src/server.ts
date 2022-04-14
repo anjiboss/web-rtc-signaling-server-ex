@@ -61,6 +61,7 @@ io.on("connection", (socket) => {
 
   socket.on("clear", () => {
     users = [];
+    console.log("cleared. user.length = ", users.length);
   });
 });
 
