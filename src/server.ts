@@ -8,14 +8,14 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: [
-      "http://localhost:3000",
+       "http://localhost:3000",     "http://localhost:3030",
       "http://192.168.43.172:3000",
       "https://animated-shortbread-6f92ef.netlify.app",
     ],
   },
 });
 
-const port = process.env.PORT;
+const port = process.env.PORT || 5050;
 let users: { username: string; socketId: string }[] = [];
 
 app.use(cors());
