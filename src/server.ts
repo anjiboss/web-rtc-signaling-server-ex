@@ -13,6 +13,7 @@ const io = new Server(httpServer, {
       "http://localhost:3030",
       "http://192.168.43.172:3000",
       "https://wondrous-griffin-3c9360.netlify.app",
+      "https://marvelous-zabaione-016be3.netlify.app",
     ],
   },
 });
