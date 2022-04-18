@@ -1,8 +1,22 @@
 import { Server, Socket } from "socket.io";
 
 const socketController = (socket: Socket, _io: Server) => {
+  socket.on("calling", () => {
+    socket.broadcast.emit("incoming-call");
+  });
+
+  socket.on("accept", () => {
+    console.log("call-accepted", socket.id);
+    socket.broadcast.emit("accepted");
+  });
+
+  socket.on("deny", () => {
+    console.log("denied");
+    socket.broadcast.emit("denied");
+  });
+
   socket.on("send-offer", ({ offer }) => {
-    console.log("send-offer");
+    console.log("send-offer", socket.id);
     socket.broadcast.emit("get-offer", { offer });
   });
 
@@ -17,6 +31,7 @@ const socketController = (socket: Socket, _io: Server) => {
   });
 
   socket.on("answer-send-candidate", ({ candidate }) => {
+    console.log("answer-send-candidate");
     socket.broadcast.emit("add-answer-candidate", { answer: candidate });
   });
 };
