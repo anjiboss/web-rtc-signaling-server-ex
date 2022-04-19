@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 
 interface Room {
   roomName: string;
-  users: string[];
+  users: { username: string; socket: string }[];
 }
 
 const rooms: Room[] = [];
@@ -13,7 +13,7 @@ const socketController = (socket: Socket, _io: Server) => {
   });
 
   socket.on("create-room", ({ roomName, user }) => {
-    rooms.push({ roomName, users: [user] });
+    rooms.push({ roomName, users: [{ socket: socket.id, username: user }] });
     socket.join(roomName);
     socket.broadcast.emit("new-room", { roomName, users: [user] });
     socket.emit("notify", { message: "new room created" });
@@ -23,7 +23,7 @@ const socketController = (socket: Socket, _io: Server) => {
     console.log("leave-room", { roomName, user });
     rooms.forEach((r, i) => {
       if (r.roomName === roomName) {
-        rooms[i].users = rooms[i].users.filter((u) => u !== user);
+        rooms[i].users = rooms[i].users.filter((u) => u.username !== user);
       }
     });
     socket.to(roomName).emit("user-leave-room", { user: user });
@@ -33,50 +33,55 @@ const socketController = (socket: Socket, _io: Server) => {
     socket.join(roomName);
     rooms.forEach((r, i) => {
       if (r.roomName === roomName) {
-        rooms[i].users.push(user);
+        rooms[i].users.push({ username: user, socket: socket.id });
       }
     });
     socket.to(roomName).emit("user-join-room", { user: user });
     socket.emit("notify", { message: "Joined room" });
   });
 
-  socket.on("calling", ({ roomName }) => {
-    socket.to(roomName).emit("incoming-call");
+  socket.on("send-offer", ({ from, to, offer }) => {
+    console.log("send-offer", { from, to });
+    socket.to(to).emit("get-offer", { offer });
   });
 
-  socket.on("accept", ({ roomName }) => {
-    console.log("call-accepted", socket.id);
-    socket.to(roomName).emit("accepted");
-  });
+  // socket.on("calling", ({ roomName }) => {
+  //   socket.to(roomName).emit("incoming-call");
+  // });
 
-  socket.on("deny", ({ roomName }) => {
-    console.log("denied");
-    socket.to(roomName).emit("denied");
-  });
+  // socket.on("accept", ({ roomName }) => {
+  //   console.log("call-accepted", socket.id);
+  //   socket.to(roomName).emit("accepted");
+  // });
 
-  socket.on("send-offer", ({ offer, roomName }) => {
-    console.log("send-offer", socket.id);
-    socket.to(roomName).emit("get-offer", { offer });
-  });
+  // socket.on("deny", ({ roomName }) => {
+  //   console.log("denied");
+  //   socket.to(roomName).emit("denied");
+  // });
 
-  socket.on("send-answer", ({ answer, roomName }) => {
-    console.log("send-answer");
-    socket.to(roomName).emit("answered", { answer });
-  });
+  // socket.on("send-offer", ({ offer, roomName }) => {
+  //   console.log("send-offer", socket.id);
+  //   socket.to(roomName).emit("get-offer", { offer });
+  // });
 
-  socket.on("offer-send-candidate", ({ candidate, roomName }) => {
-    console.log("offer send candidate");
-    socket.to(roomName).emit("add-offer-candidate", { offer: candidate });
-  });
+  // socket.on("send-answer", ({ answer, roomName }) => {
+  //   console.log("send-answer");
+  //   socket.to(roomName).emit("answered", { answer });
+  // });
 
-  socket.on("answer-send-candidate", ({ candidate, roomName }) => {
-    console.log("answer-send-candidate");
-    socket.to(roomName).emit("add-answer-candidate", { answer: candidate });
-  });
+  // socket.on("offer-send-candidate", ({ candidate, roomName }) => {
+  //   console.log("offer send candidate");
+  //   socket.to(roomName).emit("add-offer-candidate", { offer: candidate });
+  // });
+
+  // socket.on("answer-send-candidate", ({ candidate, roomName }) => {
+  //   console.log("answer-send-candidate");
+  //   socket.to(roomName).emit("add-answer-candidate", { answer: candidate });
+  // });
 };
 
-setInterval(() => {
-  console.log(rooms);
-}, 3000);
+// setInterval(() => {
+//   console.dir(rooms ,{depth: null });
+// }, 3000);
 
 export default socketController;

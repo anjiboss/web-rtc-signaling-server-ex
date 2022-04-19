@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import socketController from "./utils/socketController";
+import { groupCall } from "./utils/groupCall";
 
 const app = express();
 const httpServer = createServer(app);
@@ -23,6 +24,7 @@ app.use(cors());
 
 io.on("connection", (socket) => {
   socketController(socket, io);
+  groupCall(socket, io);
 });
 
 app.get("*", (_, res) => {
