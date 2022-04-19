@@ -15,7 +15,10 @@ const socketController = (socket: Socket, _io: Server) => {
   socket.on("create-room", ({ roomName, user }) => {
     rooms.push({ roomName, users: [{ socket: socket.id, username: user }] });
     socket.join(roomName);
-    socket.broadcast.emit("new-room", { roomName, users: [user] });
+    socket.broadcast.emit("new-room", {
+      roomName,
+      users: [{ socket: socket.id, username: user }],
+    });
     socket.emit("notify", { message: "new room created" });
   });
 
@@ -36,13 +39,30 @@ const socketController = (socket: Socket, _io: Server) => {
         rooms[i].users.push({ username: user, socket: socket.id });
       }
     });
-    socket.to(roomName).emit("user-join-room", { user: user });
+    socket
+      .to(roomName)
+      .emit("user-join-room", { username: user, socket: socket.id });
     socket.emit("notify", { message: "Joined room" });
   });
 
   socket.on("send-offer", ({ from, to, offer }) => {
     console.log("send-offer", { from, to });
-    socket.to(to).emit("get-offer", { offer });
+    socket.to(to).emit("get-offer", { from, offer });
+  });
+
+  socket.on("send-answer", ({ answer, from, to }) => {
+    console.log("send-answer");
+    socket.to(to).emit("answered", { answer, from });
+  });
+
+  socket.on("offer-send-candidate", ({ candidate, to, from }) => {
+    console.log("offer send candidate");
+    socket.to(to).emit("add-offer-candidate", { offer: candidate, from });
+  });
+
+  socket.on("answer-send-candidate", ({ candidate, to, from }) => {
+    console.log("answer-send-candidate");
+    socket.to(to).emit("add-answer-candidate", { answer: candidate, from });
   });
 
   // socket.on("calling", ({ roomName }) => {
